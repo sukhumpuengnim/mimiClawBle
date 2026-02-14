@@ -5,7 +5,7 @@
 [![Discord](https://img.shields.io/badge/Discord-mimiclaw-5865F2?logo=discord&logoColor=white)](https://discord.gg/r8ZxSvB8Yr)
 [![X](https://img.shields.io/badge/X-@ssslvky-black?logo=x)](https://x.com/ssslvky)
 
-**[English](README.md) | [中文](README_CN.md)**
+**[English](README.md) | [中文](README_CN.md) | [日本語](README_JA.md)**
 
 <p align="center">
   <img src="assets/banner.png" alt="MimiClaw" width="480" />
