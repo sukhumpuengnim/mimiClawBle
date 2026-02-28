@@ -33,10 +33,6 @@
 3. Subscribe ที่ Response characteristic
 4. เขียนคำสั่งที่ Command characteristic
 
-ผลกระทบต่อหน่วยความจำ:
-- ขนาด firmware: ~1.37 MB (เหลือ 35% ใน partition)
-- BLE ใช้เพิ่ม ~85 KB
-
 ### เปลี่ยน Console เป็น USB Serial/JTAG
 
 **เปลี่ยน console หลักจาก UART เป็น USB Serial/JTAG**
@@ -55,9 +51,38 @@
 - เปิด logging หลัง boot complete
 - เพิ่มข้อความ "MimiClaw boot complete - all systems ready"
 
-ผลลัพธ์:
-- พิมพ์คำสั่งที่ `mimi>` prompt ได้จาก USB port โดยตรง
-- เห็น logs หลังจาก boot เสร็จสมบูรณ์
+### การใช้งาน PSRAM
+
+**MimiClaw ใช้ PSRAM 8MB (Octal) สำหรับ large allocations**
+
+Configuration ใน `sdkconfig.defaults.esp32s3`:
+```
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+```
+
+การจัดการหน่วยความจำ:
+- Large buffers (32KB+) ควร allocate จาก PSRAM: `heap_caps_calloc(1, size, MALLOC_CAP_SPIRAM)`
+- ESP-IDF จัดการ PSRAM allocation อัตโนมัติสำหรับ large allocations
+
+การใช้งาน PSRAM ในระบบ:
+| Component | Memory Usage |
+|-----------|--------------|
+| LLM stream buffer | 32 KB |
+| BLE stack (NimBLE) | ~60-80 KB |
+| Session data | ~1 KB/session |
+| SPIFFS cache | 4 KB |
+
+Memory Budget สำหรับ BLE CLI:
+- NimBLE stack: ~50-70 KB
+- BLE task stack: 6 KB
+- Buffers: ~1 KB
+- **รวม: ~60-80 KB** จาก 8MB PSRAM (ผลกระทบน้อยมาก)
+
+ผลกระทบต่อหน่วยความจำ:
+- ขนาด firmware: ~1.37 MB (เหลือ 35% ใน partition)
+- BLE ใช้เพิ่ม ~85 KB จาก PSRAM (ไม่กระทบ internal RAM)
 
 ## 2026-02-27
 
