@@ -8,5 +8,4 @@
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
 | #7407 | 11:17 PM | 🔵 | User profile configuration template discovered in SPIFFS | ~184 |
-| #7406 | 11:16 PM | 🔵 | MimiClaw AI personality definition discovered in SOUL.md | ~239 |
 </claude-mem-context>
