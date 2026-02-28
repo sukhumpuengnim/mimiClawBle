@@ -33,7 +33,6 @@ static esp_err_t init_nvs(void)
 {
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_LOGW(TAG, "NVS partition truncated, erasing...");
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
@@ -49,46 +48,20 @@ static esp_err_t init_spiffs(void)
         .format_if_mount_failed = true,
     };
 
-    esp_err_t ret = esp_vfs_spiffs_register(&conf);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "SPIFFS mount failed: %s", esp_err_to_name(ret));
-        return ret;
-    }
-
-    size_t total = 0, used = 0;
-    esp_spiffs_info(NULL, &total, &used);
-    ESP_LOGI(TAG, "SPIFFS: total=%d, used=%d", (int)total, (int)used);
-
-    return ESP_OK;
+    return esp_vfs_spiffs_register(&conf);
 }
 
 /* Outbound dispatch task: reads from outbound queue and routes to channels */
 static void outbound_dispatch_task(void *arg)
 {
-    ESP_LOGI(TAG, "Outbound dispatch started");
-
     while (1) {
         mimi_msg_t msg;
         if (message_bus_pop_outbound(&msg, UINT32_MAX) != ESP_OK) continue;
 
-        ESP_LOGI(TAG, "Dispatching response to %s:%s", msg.channel, msg.chat_id);
-
         if (strcmp(msg.channel, MIMI_CHAN_TELEGRAM) == 0) {
-            esp_err_t send_err = telegram_send_message(msg.chat_id, msg.content);
-            if (send_err != ESP_OK) {
-                ESP_LOGE(TAG, "Telegram send failed for %s: %s", msg.chat_id, esp_err_to_name(send_err));
-            } else {
-                ESP_LOGI(TAG, "Telegram send success for %s (%d bytes)", msg.chat_id, (int)strlen(msg.content));
-            }
+            telegram_send_message(msg.chat_id, msg.content);
         } else if (strcmp(msg.channel, MIMI_CHAN_WEBSOCKET) == 0) {
-            esp_err_t ws_err = ws_server_send(msg.chat_id, msg.content);
-            if (ws_err != ESP_OK) {
-                ESP_LOGW(TAG, "WS send failed for %s: %s", msg.chat_id, esp_err_to_name(ws_err));
-            }
-        } else if (strcmp(msg.channel, MIMI_CHAN_SYSTEM) == 0) {
-            ESP_LOGI(TAG, "System message [%s]: %.128s", msg.chat_id, msg.content);
-        } else {
-            ESP_LOGW(TAG, "Unknown channel: %s", msg.channel);
+            ws_server_send(msg.chat_id, msg.content);
         }
 
         free(msg.content);
@@ -97,18 +70,8 @@ static void outbound_dispatch_task(void *arg)
 
 void app_main(void)
 {
-    /* Silence noisy components */
-    esp_log_level_set("esp-x509-crt-bundle", ESP_LOG_WARN);
-
-    ESP_LOGI(TAG, "========================================");
-    ESP_LOGI(TAG, "  MimiClaw - ESP32-S3 AI Agent");
-    ESP_LOGI(TAG, "========================================");
-
-    /* Print memory info */
-    ESP_LOGI(TAG, "Internal free: %d bytes",
-             (int)heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
-    ESP_LOGI(TAG, "PSRAM free:    %d bytes",
-             (int)heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+    /* Silence ALL logging */
+    esp_log_level_set("*", ESP_LOG_NONE);
 
     /* Input */
     button_Init();
@@ -140,18 +103,10 @@ void app_main(void)
     /* Start WiFi */
     esp_err_t wifi_err = wifi_manager_start();
     if (wifi_err == ESP_OK) {
-        ESP_LOGI(TAG, "Scanning nearby APs on boot...");
-        wifi_manager_scan_and_print();
-        ESP_LOGI(TAG, "Waiting for WiFi connection...");
         if (wifi_manager_wait_connected(30000) == ESP_OK) {
-            ESP_LOGI(TAG, "WiFi connected: %s", wifi_manager_get_ip());
-
-            /* Outbound dispatch task should start first to avoid dropping early replies. */
-            ESP_ERROR_CHECK((xTaskCreatePinnedToCore(
-                outbound_dispatch_task, "outbound",
-                MIMI_OUTBOUND_STACK, NULL,
-                MIMI_OUTBOUND_PRIO, NULL, MIMI_OUTBOUND_CORE) == pdPASS)
-                ? ESP_OK : ESP_FAIL);
+            /* Outbound dispatch task */
+            xTaskCreatePinnedToCore(outbound_dispatch_task, "outbound",
+                MIMI_OUTBOUND_STACK, NULL, MIMI_OUTBOUND_PRIO, NULL, MIMI_OUTBOUND_CORE);
 
             /* Start network-dependent services */
             ESP_ERROR_CHECK(agent_loop_start());
@@ -159,14 +114,7 @@ void app_main(void)
             cron_service_start();
             heartbeat_start();
             ESP_ERROR_CHECK(ws_server_start());
-
-            ESP_LOGI(TAG, "All services started!");
-        } else {
-            ESP_LOGW(TAG, "WiFi connection timeout. Check MIMI_SECRET_WIFI_SSID in mimi_secrets.h");
         }
-    } else {
-        ESP_LOGW(TAG, "No WiFi credentials. Set MIMI_SECRET_WIFI_SSID in mimi_secrets.h");
     }
 
-    ESP_LOGI(TAG, "MimiClaw ready. Type 'help' for CLI commands.");
 }
