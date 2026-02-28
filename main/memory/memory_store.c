@@ -105,3 +105,57 @@ esp_err_t memory_read_recent(char *buf, size_t size, int days)
 
     return ESP_OK;
 }
+
+esp_err_t memory_read_soul(char *buf, size_t size)
+{
+    FILE *f = fopen(MIMI_SOUL_FILE, "r");
+    if (!f) {
+        buf[0] = '\0';
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    size_t n = fread(buf, 1, size - 1, f);
+    buf[n] = '\0';
+    fclose(f);
+    return ESP_OK;
+}
+
+esp_err_t memory_write_soul(const char *content)
+{
+    FILE *f = fopen(MIMI_SOUL_FILE, "w");
+    if (!f) {
+        ESP_LOGE(TAG, "Cannot write %s", MIMI_SOUL_FILE);
+        return ESP_FAIL;
+    }
+    fputs(content, f);
+    fclose(f);
+    ESP_LOGI(TAG, "Soul updated (%d bytes)", (int)strlen(content));
+    return ESP_OK;
+}
+
+esp_err_t memory_read_user(char *buf, size_t size)
+{
+    FILE *f = fopen(MIMI_USER_FILE, "r");
+    if (!f) {
+        buf[0] = '\0';
+        return ESP_ERR_NOT_FOUND;
+    }
+
+    size_t n = fread(buf, 1, size - 1, f);
+    buf[n] = '\0';
+    fclose(f);
+    return ESP_OK;
+}
+
+esp_err_t memory_write_user(const char *content)
+{
+    FILE *f = fopen(MIMI_USER_FILE, "w");
+    if (!f) {
+        ESP_LOGE(TAG, "Cannot write %s", MIMI_USER_FILE);
+        return ESP_FAIL;
+    }
+    fputs(content, f);
+    fclose(f);
+    ESP_LOGI(TAG, "User profile updated (%d bytes)", (int)strlen(content));
+    return ESP_OK;
+}

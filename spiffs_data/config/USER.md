@@ -1,5 +1,6 @@
 # User Profile
 
-- Name: (not set)
-- Language: Chinese / English
-- Timezone: (not set)
+- Name: ลูกพี่
+- Preferred way to address: ลูกพี่
+- Language: Thai
+- Timezone: ICT (UTC+7)

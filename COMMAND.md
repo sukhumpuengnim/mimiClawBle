@@ -77,6 +77,24 @@ set_model glm-5
 
 ---
 
+## Soul Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `soul_read` | อ่านไฟล์ SOUL.md (บุคลิกภาพ AI) | `soul_read` |
+| `soul_write <content>` | เขียนข้อความลง SOUL.md | `soul_write I am MimiClaw, a helpful assistant` |
+
+---
+
+## User Commands
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `user_read` | อ่านไฟล์ USER.md (ข้อมูลผู้ใช้) | `user_read` |
+| `user_write <content>` | เขียนข้อความลง USER.md | `user_write Name: ลูกพี่, Language: Thai` |
+
+---
+
 ## Session Commands
 
 | Command | Description | Example |

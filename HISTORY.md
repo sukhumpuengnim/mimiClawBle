@@ -2,6 +2,25 @@
 
 ## 2026-02-28
 
+### เพิ่มคำสั่ง soul_read, soul_write, user_read, user_write
+
+**เพิ่มคำสั่ง CLI สำหรับอ่านและเขียน SOUL.md และ USER.md แบบ runtime**
+
+การเปลี่ยนแปลง:
+- `main/memory/memory_store.h` - เพิ่ม `memory_read_soul()`, `memory_write_soul()`, `memory_read_user()`, `memory_write_user()`
+- `main/memory/memory_store.c` - เพิ่ม implementation สำหรับ soul และ user read/write
+- `main/cli/serial_cli.c` - เพิ่มคำสั่ง `soul_read`, `soul_write`, `user_read`, `user_write`
+- `main/ble/ble_cli.c` - เพิ่มคำสั่งเดียวกันใน BLE CLI
+- `COMMAND.md` - เพิ่ม documentation สำหรับ Soul Commands และ User Commands
+
+การใช้งาน:
+```
+mimi> soul_read                              # ดูบุคลิกภาพ AI
+mimi> soul_write I am MimiClaw, friendly...  # เปลี่ยนบุคลิกภาพ AI
+mimi> user_read                              # ดูข้อมูลผู้ใช้
+mimi> user_write Name: ลูกพี่, Language: Thai  # เปลี่ยนข้อมูลผู้ใช้
+```
+
 ### เพิ่มคำสั่ง set_api_url สำหรับกำหนด API URL แบบ runtime
 
 **เพิ่มคำสั่ง `set_api_url` ให้สามารถเปลี่ยน API endpoint ได้โดยไม่ต้อง flash ใหม่**

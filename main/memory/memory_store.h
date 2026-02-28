@@ -29,3 +29,25 @@ esp_err_t memory_append_today(const char *note);
  * @param days  Number of days to look back (default 3)
  */
 esp_err_t memory_read_recent(char *buf, size_t size, int days);
+
+/**
+ * Read soul/personality (SOUL.md) into buffer.
+ * @return ESP_OK on success, ESP_ERR_NOT_FOUND if file missing
+ */
+esp_err_t memory_read_soul(char *buf, size_t size);
+
+/**
+ * Write content to soul/personality (SOUL.md).
+ */
+esp_err_t memory_write_soul(const char *content);
+
+/**
+ * Read user profile (USER.md) into buffer.
+ * @return ESP_OK on success, ESP_ERR_NOT_FOUND if file missing
+ */
+esp_err_t memory_read_user(char *buf, size_t size);
+
+/**
+ * Write content to user profile (USER.md).
+ */
+esp_err_t memory_write_user(const char *content);

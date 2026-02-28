@@ -137,6 +137,48 @@ static void cmd_memory_write(const char *content)
     resp_append("MEMORY.md updated.\n");
 }
 
+static void cmd_soul_read(void)
+{
+    char *buf = malloc(4096);
+    if (!buf) {
+        resp_append("Out of memory.\n");
+        return;
+    }
+    if (memory_read_soul(buf, 4096) == ESP_OK && buf[0]) {
+        resp_append("=== SOUL.md ===\n%s\n===============\n", buf);
+    } else {
+        resp_append("SOUL.md is empty or not found.\n");
+    }
+    free(buf);
+}
+
+static void cmd_soul_write(const char *content)
+{
+    memory_write_soul(content);
+    resp_append("SOUL.md updated.\n");
+}
+
+static void cmd_user_read(void)
+{
+    char *buf = malloc(4096);
+    if (!buf) {
+        resp_append("Out of memory.\n");
+        return;
+    }
+    if (memory_read_user(buf, 4096) == ESP_OK && buf[0]) {
+        resp_append("=== USER.md ===\n%s\n===============\n", buf);
+    } else {
+        resp_append("USER.md is empty or not found.\n");
+    }
+    free(buf);
+}
+
+static void cmd_user_write(const char *content)
+{
+    memory_write_user(content);
+    resp_append("USER.md updated.\n");
+}
+
 static void cmd_session_list(void)
 {
     resp_append("Sessions:\n");
@@ -315,6 +357,10 @@ static void cmd_help(void)
     resp_append("  config_reset             - Clear NVS config\n");
     resp_append("  memory_read              - Read MEMORY.md\n");
     resp_append("  memory_write <text>      - Write to MEMORY.md\n");
+    resp_append("  soul_read                - Read SOUL.md (AI personality)\n");
+    resp_append("  soul_write <text>        - Write to SOUL.md\n");
+    resp_append("  user_read                - Read USER.md (user profile)\n");
+    resp_append("  user_write <text>        - Write to USER.md\n");
     resp_append("  session_list             - List sessions\n");
     resp_append("  session_clear <id>       - Clear session\n");
     resp_append("  skill_list               - List skills\n");
@@ -459,6 +505,30 @@ static void process_command(const char *cmd, size_t len)
             cmd_memory_write(content);
         } else {
             resp_append("Usage: memory_write <content>\n");
+        }
+    }
+    else if (strcmp(token, "soul_read") == 0) {
+        cmd_soul_read();
+    }
+    else if (strcmp(token, "soul_write") == 0) {
+        char *content = strtok_r(NULL, "", &saveptr);
+        if (content) {
+            while (*content && isspace((unsigned char)*content)) content++;
+            cmd_soul_write(content);
+        } else {
+            resp_append("Usage: soul_write <content>\n");
+        }
+    }
+    else if (strcmp(token, "user_read") == 0) {
+        cmd_user_read();
+    }
+    else if (strcmp(token, "user_write") == 0) {
+        char *content = strtok_r(NULL, "", &saveptr);
+        if (content) {
+            while (*content && isspace((unsigned char)*content)) content++;
+            cmd_user_write(content);
+        } else {
+            resp_append("Usage: user_write <content>\n");
         }
     }
     else if (strcmp(token, "session_list") == 0) {

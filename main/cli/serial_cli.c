@@ -179,6 +179,76 @@ static int cmd_memory_write(int argc, char **argv)
     return 0;
 }
 
+/* --- soul_read command --- */
+static int cmd_soul_read(int argc, char **argv)
+{
+    char *buf = malloc(4096);
+    if (!buf) {
+        printf("Out of memory.\n");
+        return 1;
+    }
+    if (memory_read_soul(buf, 4096) == ESP_OK && buf[0]) {
+        printf("=== SOUL.md ===\n%s\n===============\n", buf);
+    } else {
+        printf("SOUL.md is empty or not found.\n");
+    }
+    free(buf);
+    return 0;
+}
+
+/* --- soul_write command --- */
+static struct {
+    struct arg_str *content;
+    struct arg_end *end;
+} soul_write_args;
+
+static int cmd_soul_write(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **)&soul_write_args);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, soul_write_args.end, argv[0]);
+        return 1;
+    }
+    memory_write_soul(soul_write_args.content->sval[0]);
+    printf("SOUL.md updated.\n");
+    return 0;
+}
+
+/* --- user_read command --- */
+static int cmd_user_read(int argc, char **argv)
+{
+    char *buf = malloc(4096);
+    if (!buf) {
+        printf("Out of memory.\n");
+        return 1;
+    }
+    if (memory_read_user(buf, 4096) == ESP_OK && buf[0]) {
+        printf("=== USER.md ===\n%s\n===============\n", buf);
+    } else {
+        printf("USER.md is empty or not found.\n");
+    }
+    free(buf);
+    return 0;
+}
+
+/* --- user_write command --- */
+static struct {
+    struct arg_str *content;
+    struct arg_end *end;
+} user_write_args;
+
+static int cmd_user_write(int argc, char **argv)
+{
+    int nerrors = arg_parse(argc, argv, (void **)&user_write_args);
+    if (nerrors != 0) {
+        arg_print_errors(stderr, user_write_args.end, argv[0]);
+        return 1;
+    }
+    memory_write_user(user_write_args.content->sval[0]);
+    printf("USER.md updated.\n");
+    return 0;
+}
+
 /* --- session_list command --- */
 static int cmd_session_list(int argc, char **argv)
 {
@@ -730,6 +800,44 @@ esp_err_t serial_cli_init(void)
         .argtable = &memory_write_args,
     };
     esp_console_cmd_register(&mem_write_cmd);
+
+    /* soul_read */
+    esp_console_cmd_t soul_read_cmd = {
+        .command = "soul_read",
+        .help = "Read SOUL.md (AI personality)",
+        .func = &cmd_soul_read,
+    };
+    esp_console_cmd_register(&soul_read_cmd);
+
+    /* soul_write */
+    soul_write_args.content = arg_str1(NULL, NULL, "<content>", "Content to write");
+    soul_write_args.end = arg_end(1);
+    esp_console_cmd_t soul_write_cmd = {
+        .command = "soul_write",
+        .help = "Write to SOUL.md",
+        .func = &cmd_soul_write,
+        .argtable = &soul_write_args,
+    };
+    esp_console_cmd_register(&soul_write_cmd);
+
+    /* user_read */
+    esp_console_cmd_t user_read_cmd = {
+        .command = "user_read",
+        .help = "Read USER.md (user profile)",
+        .func = &cmd_user_read,
+    };
+    esp_console_cmd_register(&user_read_cmd);
+
+    /* user_write */
+    user_write_args.content = arg_str1(NULL, NULL, "<content>", "Content to write");
+    user_write_args.end = arg_end(1);
+    esp_console_cmd_t user_write_cmd = {
+        .command = "user_write",
+        .help = "Write to USER.md",
+        .func = &cmd_user_write,
+        .argtable = &user_write_args,
+    };
+    esp_console_cmd_register(&user_write_cmd);
 
     /* session_list */
     esp_console_cmd_t sess_list_cmd = {
