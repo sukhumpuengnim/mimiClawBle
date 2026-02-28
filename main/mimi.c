@@ -71,7 +71,7 @@ static void outbound_dispatch_task(void *arg)
 
 void app_main(void)
 {
-    /* Silence ALL logging */
+    /* Silence ALL logging during early boot */
     esp_log_level_set("*", ESP_LOG_NONE);
 
     /* Input */
@@ -120,5 +120,9 @@ void app_main(void)
             ESP_ERROR_CHECK(ws_server_start());
         }
     }
+
+    /* Boot complete - enable logging */
+    esp_log_level_set("*", ESP_LOG_INFO);
+    ESP_LOGI(TAG, "MimiClaw boot complete - all systems ready");
 
 }
