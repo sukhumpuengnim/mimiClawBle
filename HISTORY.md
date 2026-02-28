@@ -84,6 +84,78 @@ Memory Budget สำหรับ BLE CLI:
 - ขนาด firmware: ~1.37 MB (เหลือ 35% ใน partition)
 - BLE ใช้เพิ่ม ~85 KB จาก PSRAM (ไม่กระทบ internal RAM)
 
+### ESP-IDF Menuconfig
+
+**ใช้สำหรับตั้งค่า firmware configuration ตอน build**
+
+เรียกใช้งาน:
+```bash
+source ~/.espressif/esp-idf-v5.5.2/export.sh
+idf.py menuconfig
+```
+
+Keyboard shortcuts:
+| Key | ฟังก์ชัน |
+|-----|----------|
+| `↑` `↓` | เลื่อนขึ้นลง |
+| `Enter` | เข้าเมนู / เลือก option |
+| `Esc` | ออกจากเมนู |
+| `Space` | เลือก/ไม่เลือก option |
+| `?` | ดู help |
+| `/` | ค้นหา option |
+| `S` | Save |
+| `Q` | ออก |
+
+เมนูสำคัญสำหรับ MimiClaw:
+
+**1. PSRAM (8MB Octal)**
+```
+Component config → ESP PSRAM
+├── [*] Support for external SPI-connected RAM
+├── SPI RAM Mode (Octal)
+├── SPI RAM Speed (80MHz)
+├── SPI RAM Size (8MB)
+└── [*] Initialize SPI RAM during startup
+```
+
+**2. BLE (NimBLE)**
+```
+Component config → Bluetooth
+├── [*] Bluetooth
+├── Bluetooth Host (NimBLE)
+└── NimBLE Options
+    ├── [*] Enable BLE 5.0 features
+    ├── Maximum number of concurrent connections (1)
+    └── Host Task Stack Size (4096)
+```
+
+**3. Console (USB Serial/JTAG)**
+```
+Component config → ESP System Settings
+└── Console
+    └── Console output (USB Serial/JTAG)
+```
+
+**4. Logging**
+```
+Component config → Log output
+├── Default log verbosity (Info)
+└── [*] Enable ANSI color codes
+```
+
+**5. FreeRTOS**
+```
+Component config → FreeRTOS
+├── [*] Enable FreeRTOS to run on multiple cores
+└── Kernel config
+    └── Maximum number of tasks (32)
+```
+
+ไฟล์ที่เกี่ยวข้อง:
+- `sdkconfig.defaults.esp32s3` - Default settings (กำหนดไว้ใน project)
+- `sdkconfig` - Current settings (generate จาก menuconfig)
+- `build/config/sdkconfig.h` - Header สำหรับ code
+
 ## 2026-02-27
 
 ### Model Configuration Update
