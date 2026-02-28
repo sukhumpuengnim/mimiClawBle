@@ -111,6 +111,19 @@
 #define MIMI_CLI_PRIO                3
 #define MIMI_CLI_CORE                0
 
+/* BLE CLI */
+#define MIMI_BLE_DEVICE_NAME         "MimiClaw"
+#define MIMI_BLE_STACK               (6 * 1024)
+#define MIMI_BLE_PRIO                3
+#define MIMI_BLE_CORE                0
+#define MIMI_BLE_CMD_MAX_LEN         256
+#define MIMI_BLE_RESP_MAX_LEN        512
+
+/* BLE GATT Service UUIDs (custom) */
+#define MIMI_BLE_SVC_UUID            0x1813  /* Custom service */
+#define MIMI_BLE_CHAR_CMD_UUID       0x2A01  /* Command input (write) */
+#define MIMI_BLE_CHAR_RESP_UUID      0x2A02  /* Response output (notify) */
+
 /* NVS Namespaces */
 #define MIMI_NVS_WIFI                "wifi_config"
 #define MIMI_NVS_TG                  "tg_config"

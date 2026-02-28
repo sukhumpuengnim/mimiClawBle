@@ -26,6 +26,7 @@
 #include "buttons/button_driver.h"
 #include "imu/imu_manager.h"
 #include "skills/skill_loader.h"
+#include "ble/ble_cli.h"
 
 static const char *TAG = "mimi";
 
@@ -99,6 +100,9 @@ void app_main(void)
 
     /* Start Serial CLI first (works without WiFi) */
     ESP_ERROR_CHECK(serial_cli_init());
+
+    /* Start BLE CLI (works without WiFi) */
+    ESP_ERROR_CHECK(ble_cli_init());
 
     /* Start WiFi */
     esp_err_t wifi_err = wifi_manager_start();
