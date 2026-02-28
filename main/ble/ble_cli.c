@@ -110,6 +110,12 @@ static void cmd_set_model_provider(const char *provider)
     resp_append("Model provider set.\n");
 }
 
+static void cmd_set_api_url(const char *url)
+{
+    llm_set_api_url(url);
+    resp_append("API URL saved.\n");
+}
+
 static void cmd_memory_read(void)
 {
     char *buf = malloc(4096);
@@ -240,6 +246,7 @@ static void cmd_config_show(void)
     print_config_line("API Key",    MIMI_NVS_LLM,    MIMI_NVS_KEY_API_KEY,  MIMI_SECRET_API_KEY,    true);
     print_config_line("Model",      MIMI_NVS_LLM,    MIMI_NVS_KEY_MODEL,    MIMI_SECRET_MODEL,      false);
     print_config_line("Provider",   MIMI_NVS_LLM,    MIMI_NVS_KEY_PROVIDER, MIMI_SECRET_MODEL_PROVIDER, false);
+    print_config_line("API URL",    MIMI_NVS_LLM,    MIMI_NVS_KEY_API_URL,  MIMI_LLM_API_URL,       false);
     print_config_line("Proxy Host", MIMI_NVS_PROXY,  MIMI_NVS_KEY_PROXY_HOST, MIMI_SECRET_PROXY_HOST, false);
     print_config_line("Proxy Port", MIMI_NVS_PROXY,  MIMI_NVS_KEY_PROXY_PORT, MIMI_SECRET_PROXY_PORT, false);
     print_config_line("Search Key", MIMI_NVS_SEARCH, MIMI_NVS_KEY_API_KEY,  MIMI_SECRET_SEARCH_KEY, true);
@@ -300,6 +307,7 @@ static void cmd_help(void)
     resp_append("  set_api_key <key>        - Set LLM API key\n");
     resp_append("  set_model <model>        - Set LLM model\n");
     resp_append("  set_model_provider <p>   - Set provider (anthropic|openai)\n");
+    resp_append("  set_api_url <url>        - Set LLM API URL\n");
     resp_append("  set_proxy <h> <p> [t]    - Set proxy (type: http|socks5)\n");
     resp_append("  clear_proxy              - Clear proxy\n");
     resp_append("  set_search_key <key>     - Set Brave Search API key\n");
@@ -400,6 +408,15 @@ static void process_command(const char *cmd, size_t len)
             cmd_set_model_provider(provider);
         } else {
             resp_append("Usage: set_model_provider <anthropic|openai>\n");
+        }
+    }
+    else if (strcmp(token, "set_api_url") == 0) {
+        char *url = strtok_r(NULL, "", &saveptr);
+        if (url) {
+            while (*url && isspace((unsigned char)*url)) url++;
+            cmd_set_api_url(url);
+        } else {
+            resp_append("Usage: set_api_url <url>\n");
         }
     }
     else if (strcmp(token, "set_proxy") == 0) {

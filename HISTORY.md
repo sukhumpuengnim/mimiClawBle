@@ -2,6 +2,25 @@
 
 ## 2026-02-28
 
+### เพิ่มคำสั่ง set_api_url สำหรับกำหนด API URL แบบ runtime
+
+**เพิ่มคำสั่ง `set_api_url` ให้สามารถเปลี่ยน API endpoint ได้โดยไม่ต้อง flash ใหม่**
+
+การเปลี่ยนแปลง:
+- `main/mimi_config.h` - เพิ่ม NVS key `MIMI_NVS_KEY_API_URL`
+- `main/llm/llm_proxy.h` - เพิ่ม `llm_set_api_url()` และ `llm_get_api_url()`
+- `main/llm/llm_proxy.c` - เก็บ API URL ใน NVS, fallback ไป default ตาม provider
+- `main/cli/serial_cli.c` - เพิ่มคำสั่ง `set_api_url <url>`
+- `main/ble/ble_cli.c` - เพิ่มคำสั่ง `set_api_url` ใน BLE CLI
+
+การใช้งาน:
+```
+mimi> set_api_url https://api.anthropic.com/v1/messages
+mimi> set_api_url https://api.z.ai/api/anthropic/v1/messages
+mimi> set_api_url https://api.openai.com/v1/chat/completions
+mimi> config_show  # แสดง API URL ปัจจุบัน
+```
+
 ### เพิ่มฟีเจอร์ BLE CLI สำหรับการกำหนดค่าแบบไร้สาย
 
 **สร้าง Bluetooth Low Energy CLI เพื่อให้สามารถกำหนดค่า MimiClaw ได้จากโทรศัพท์โดยไม่ต้องใช้สาย USB**

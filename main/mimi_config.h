@@ -61,15 +61,15 @@
 #define MIMI_MAX_TOOL_CALLS          4
 #define MIMI_AGENT_SEND_WORKING_STATUS 1
 
-/* Timezone (POSIX TZ format) */
-#define MIMI_TIMEZONE                "PST8PDT,M3.2.0,M11.1.0"
+/* Timezone (POSIX TZ format) - Asia/Bangkok (ICT, no DST) */
+#define MIMI_TIMEZONE                "ICT-7"
 
 /* LLM */
 #define MIMI_LLM_DEFAULT_MODEL       "claude-opus-4-5"
 #define MIMI_LLM_PROVIDER_DEFAULT    "anthropic"
 #define MIMI_LLM_MAX_TOKENS          4096
 #define MIMI_LLM_API_URL             "https://api.z.ai/api/anthropic/v1/messages"
-#define MIMI_OPENAI_API_URL          "https://api.z.ai/api/anthropic/v1/messages"
+#define MIMI_OPENAI_API_URL          "https://api.openai.com/v1/chat/completions"
 #define MIMI_LLM_API_VERSION         "2023-06-01"
 #define MIMI_LLM_STREAM_BUF_SIZE     (32 * 1024)
 #define MIMI_LLM_LOG_VERBOSE_PAYLOAD 0
@@ -140,3 +140,4 @@
 #define MIMI_NVS_KEY_PROVIDER        "provider"
 #define MIMI_NVS_KEY_PROXY_HOST      "host"
 #define MIMI_NVS_KEY_PROXY_PORT      "port"
+#define MIMI_NVS_KEY_API_URL         "api_url"

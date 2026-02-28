@@ -15,12 +15,14 @@ static const char *TAG = "llm";
 
 #define LLM_API_KEY_MAX_LEN 320
 #define LLM_MODEL_MAX_LEN   64
+#define LLM_API_URL_MAX_LEN 256
 #define LLM_DUMP_MAX_BYTES   (16 * 1024)
 #define LLM_DUMP_CHUNK_BYTES 320
 
 static char s_api_key[LLM_API_KEY_MAX_LEN] = {0};
 static char s_model[LLM_MODEL_MAX_LEN] = MIMI_LLM_DEFAULT_MODEL;
 static char s_provider[16] = MIMI_LLM_PROVIDER_DEFAULT;
+static char s_api_url[LLM_API_URL_MAX_LEN] = {0};
 
 static void llm_log_payload(const char *label, const char *payload)
 {
@@ -141,6 +143,11 @@ static bool provider_is_openai(void)
 
 static const char *llm_api_url(void)
 {
+    /* NVS override takes highest priority */
+    if (s_api_url[0] != '\0') {
+        return s_api_url;
+    }
+    /* Fallback to default based on provider */
     return provider_is_openai() ? MIMI_OPENAI_API_URL : MIMI_LLM_API_URL;
 }
 
@@ -186,6 +193,11 @@ esp_err_t llm_proxy_init(void)
         len = sizeof(provider_tmp);
         if (nvs_get_str(nvs, MIMI_NVS_KEY_PROVIDER, provider_tmp, &len) == ESP_OK && provider_tmp[0]) {
             safe_copy(s_provider, sizeof(s_provider), provider_tmp);
+        }
+        char url_tmp[LLM_API_URL_MAX_LEN] = {0};
+        len = sizeof(url_tmp);
+        if (nvs_get_str(nvs, MIMI_NVS_KEY_API_URL, url_tmp, &len) == ESP_OK && url_tmp[0]) {
+            safe_copy(s_api_url, sizeof(s_api_url), url_tmp);
         }
         nvs_close(nvs);
     }
@@ -757,4 +769,39 @@ esp_err_t llm_set_provider(const char *provider)
     safe_copy(s_provider, sizeof(s_provider), provider);
     ESP_LOGI(TAG, "Provider set to: %s", s_provider);
     return ESP_OK;
+}
+
+esp_err_t llm_set_api_url(const char *url)
+{
+    nvs_handle_t nvs;
+    esp_err_t err = nvs_open(MIMI_NVS_LLM, NVS_READWRITE, &nvs);
+    if (err != ESP_OK) return err;
+    err = nvs_set_str(nvs, MIMI_NVS_KEY_API_URL, url);
+    nvs_commit(nvs);
+    nvs_close(nvs);
+
+    safe_copy(s_api_url, sizeof(s_api_url), url);
+    ESP_LOGI(TAG, "API URL set to: %s", s_api_url);
+    return ESP_OK;
+}
+
+esp_err_t llm_get_api_url(char *url, size_t max_len)
+{
+    if (!url || max_len == 0) return ESP_ERR_INVALID_ARG;
+
+    /* Check in-memory cache first */
+    if (s_api_url[0] != '\0') {
+        safe_copy(url, max_len, s_api_url);
+        return ESP_OK;
+    }
+
+    /* Try NVS */
+    nvs_handle_t nvs;
+    esp_err_t err = nvs_open(MIMI_NVS_LLM, NVS_READONLY, &nvs);
+    if (err != ESP_OK) return err;
+
+    size_t len = max_len;
+    err = nvs_get_str(nvs, MIMI_NVS_KEY_API_URL, url, &len);
+    nvs_close(nvs);
+    return err;
 }

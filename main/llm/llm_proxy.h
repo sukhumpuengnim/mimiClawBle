@@ -27,6 +27,17 @@ esp_err_t llm_set_provider(const char *provider);
  */
 esp_err_t llm_set_model(const char *model);
 
+/**
+ * Save the API URL to NVS.
+ */
+esp_err_t llm_set_api_url(const char *url);
+
+/**
+ * Get the API URL from NVS.
+ * @return ESP_OK if found, ESP_ERR_NOT_FOUND otherwise
+ */
+esp_err_t llm_get_api_url(char *url, size_t max_len);
+
 /* ── Tool Use Support ──────────────────────────────────────────── */
 
 typedef struct {
