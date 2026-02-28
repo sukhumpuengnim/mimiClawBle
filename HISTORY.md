@@ -2,62 +2,62 @@
 
 ## 2026-02-28
 
-### BLE CLI Feature Implementation
+### เพิ่มฟีเจอร์ BLE CLI สำหรับการกำหนดค่าแบบไร้สาย
 
-**Added Bluetooth Low Energy CLI for wireless configuration**
+**สร้าง Bluetooth Low Energy CLI เพื่อให้สามารถกำหนดค่า MimiClaw ได้จากโทรศัพท์โดยไม่ต้องใช้สาย USB**
 
-- Created new BLE component (`main/ble/`):
-  - `ble_cli.h` - BLE CLI interface
-  - `ble_cli.c` - NimBLE-based BLE service implementation (~700 lines)
-  - `CMakeLists.txt` - Build configuration
+ไฟล์ที่สร้างใหม่ (`main/ble/`):
+- `ble_cli.h` - Interface สำหรับ BLE CLI
+- `ble_cli.c` - Implementation ด้วย NimBLE stack (~700 บรรทัด)
+- `CMakeLists.txt` - Build configuration
 
-- BLE Service Design:
-  - Device Name: "MimiClaw"
-  - Service UUID: 0x1813 (custom)
-  - Command Characteristic (0x2A01): Write-only, receive commands from phone
-  - Response Characteristic (0x2A02): Read + Notify, send responses to phone
+การออกแบบ BLE Service:
+- ชื่ออุปกรณ์: "MimiClaw"
+- Service UUID: 0x1813
+- Command Characteristic (0x2A01): รับคำสั่งจากโทรศัพท์ (Write)
+- Response Characteristic (0x2A02): ส่งผลลัพธ์ไปโทรศัพท์ (Read + Notify)
 
-- Supported Commands (same as Serial CLI):
-  - WiFi: `set_wifi`, `wifi_status`, `wifi_scan`
-  - API: `set_api_key`, `set_model`, `set_model_provider`, `set_tg_token`
-  - Proxy: `set_proxy`, `clear_proxy`, `set_search_key`
-  - Config: `config_show`, `config_reset`
-  - Memory: `memory_read`, `memory_write`
-  - Session: `session_list`, `session_clear`
-  - Skills: `skill_list`
-  - System: `heap_info`, `heartbeat_trigger`, `cron_start`, `restart`, `help`
+คำสั่งที่รองรับบน BLE (เหมือนกับ Serial CLI):
+- WiFi: `set_wifi <ssid> <pass>`, `wifi_status`, `wifi_scan`
+- API: `set_api_key <key>`, `set_model <model>`, `set_model_provider <provider>`, `set_tg_token <token>`
+- Proxy: `set_proxy <host> <port> [type]`, `clear_proxy`, `set_search_key <key>`
+- Config: `config_show`, `config_reset`
+- Memory: `memory_read`, `memory_write <content>`
+- Session: `session_list`, `session_clear <chat_id>`
+- Skills: `skill_list`
+- System: `heap_info`, `heartbeat_trigger`, `cron_start`, `restart`, `help`
 
-- Configuration Changes (`sdkconfig.defaults.esp32s3`):
-  - Enabled NimBLE Bluetooth stack
-  - Added BLE buffer configuration
+วิธีใช้งาน:
+1. เปิดแอป nRF Connect หรือ BLE Terminal บนโทรศัพท์
+2. Scan และ connect ไปที่ "MimiClaw"
+3. Subscribe ที่ Response characteristic
+4. เขียนคำสั่งที่ Command characteristic
 
-- Usage:
-  - Use nRF Connect or BLE Terminal app on phone
-  - Connect to "MimiClaw" device
-  - Write commands to Command characteristic
-  - Subscribe to Response characteristic for output
+ผลกระทบต่อหน่วยความจำ:
+- ขนาด firmware: ~1.37 MB (เหลือ 35% ใน partition)
+- BLE ใช้เพิ่ม ~85 KB
 
-### Console Configuration Update
+### เปลี่ยน Console เป็น USB Serial/JTAG
 
-**Changed console from UART to USB Serial/JTAG as primary**
+**เปลี่ยน console หลักจาก UART เป็น USB Serial/JTAG**
 
-- Changed `sdkconfig.defaults.esp32s3`:
-  - From: UART primary + USB Serial/JTAG secondary
-  - To: USB Serial/JTAG primary only
+การเปลี่ยนแปลงใน `sdkconfig.defaults.esp32s3`:
+- เดิม: UART เป็น primary, USB Serial/JTAG เป็น secondary
+- ใหม่: USB Serial/JTAG เป็น primary (ตัวเดียว)
 
-- Benefits:
-  - Serial CLI now works via USB port directly
-  - No need to move cable to COM port for serial commands
-  - Flash and serial monitor work on same USB port
+ข้อดี:
+- ใช้ Serial CLI ผ่าน USB port ได้โดยตรง
+- ไม่ต้องย้ายสายไปเสียบที่ COM port แล้ว
+- Flash และ serial monitor ใช้ USB port เดียวกัน
 
-- Logging Changes (`main/mimi.c`):
-  - Silent during early boot (cleaner startup)
-  - Enabled after boot complete (all systems ready)
-  - Added boot complete log message
+การเปลี่ยนแปลง logging ใน `main/mimi.c`:
+- เงียบช่วง early boot (ลด noise)
+- เปิด logging หลัง boot complete
+- เพิ่มข้อความ "MimiClaw boot complete - all systems ready"
 
-- Memory Impact:
-  - Firmware size: ~1.37 MB (35% free space in partition)
-  - BLE adds ~85 KB
+ผลลัพธ์:
+- พิมพ์คำสั่งที่ `mimi>` prompt ได้จาก USB port โดยตรง
+- เห็น logs หลังจาก boot เสร็จสมบูรณ์
 
 ## 2026-02-27
 
